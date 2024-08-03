@@ -6,23 +6,24 @@ import io.mockk.every
 import org.example.boilerdocs.dto.UserReq
 import org.example.boilerdocs.entity.TUser
 import org.example.boilerdocs.repo.UserRepository
+import org.example.boilerdocs.util.restdocs.NUMBER
+import org.example.boilerdocs.util.restdocs.STRING
+import org.example.boilerdocs.util.restdocs.dsl.ApiDocumentBuilder
+import org.example.boilerdocs.util.restdocs.dsl.RequestBuilder
+import org.example.boilerdocs.util.restdocs.dsl.documentBuilder
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
-import org.springframework.http.MediaType
+import org.springframework.http.HttpMethod
 import org.springframework.restdocs.RestDocumentationContextProvider
 import org.springframework.restdocs.RestDocumentationExtension
-import org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document
 import org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration
-import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post
 import org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint
-import org.springframework.restdocs.payload.JsonFieldType
-import org.springframework.restdocs.payload.PayloadDocumentation.*
 import org.springframework.restdocs.templates.TemplateFormats
 import org.springframework.test.web.servlet.MockMvc
-import org.springframework.test.web.servlet.result.MockMvcResultHandlers
+import org.springframework.test.web.servlet.ResultActions
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import org.springframework.test.web.servlet.setup.DefaultMockMvcBuilder
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
@@ -67,31 +68,40 @@ class DbUserControllerTest {
             address = "350 Fifth Ave, New York, NY"
         )
 
-        val requestBuilder = post("/db/users")
-            .accept(MediaType.APPLICATION_JSON)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(mapper.writeValueAsString(UserReq()))
+        makeDocument(
+            requestBuilderBlock = {
+                endPoint = "/db/users"
+                method = HttpMethod.POST
+                body = UserReq()
+            },
+            documentBuilderBlock = {
+                name { "dbUser" }
+                requestBody {
+                    "name" type STRING means "이름"
+                    "hobby" type STRING means "취미"
+                }
+                responseBody {
+                    "id" type NUMBER means "ID"
+                    "name" type STRING means "이름"
+                    "phone" type STRING means "폰"
+                    "hobby" type STRING means "취미"
+                    "email" type STRING means "이메일"
+                    "birthDate" type STRING means "생일 선물"
+                    "address" type STRING means "주소"
+                }
+            }
+        )
+    }
 
-        mockMvc.perform(requestBuilder)
+    private fun makeDocument(
+        requestBuilderBlock: RequestBuilder.() -> Unit,
+        documentBuilderBlock: ApiDocumentBuilder.() -> Unit
+    ): ResultActions {
+        val requestBuilder = RequestBuilder().apply(requestBuilderBlock).build()
+        val documentAction = documentBuilder(documentBuilderBlock)
+
+        return mockMvc.perform(requestBuilder)
             .andExpect(status().isOk)
-            .andDo(MockMvcResultHandlers.print())
-            .andDo(
-                document(
-                    "user",
-                    requestFields(
-                        fieldWithPath("name").type(JsonFieldType.STRING).description("이름"),
-                        fieldWithPath("hobby").type(JsonFieldType.STRING).description("취미")
-                    ),
-                    responseFields(
-                        fieldWithPath("id").type(JsonFieldType.NUMBER).description("ID"),
-                        fieldWithPath("name").type(JsonFieldType.STRING).description("이름"),
-                        fieldWithPath("phone").type(JsonFieldType.STRING).description("폰"),
-                        fieldWithPath("hobby").type(JsonFieldType.STRING).description("취미"),
-                        fieldWithPath("email").type(JsonFieldType.STRING).description("이메일"),
-                        fieldWithPath("birthDate").type(JsonFieldType.STRING).description("생일 선물"),
-                        fieldWithPath("address").type(JsonFieldType.STRING).description("주소"),
-                    )
-                )
-            )
+            .andDo(documentAction)
     }
 }
