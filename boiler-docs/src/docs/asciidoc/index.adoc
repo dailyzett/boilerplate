@@ -33,5 +33,28 @@ include::{snippets}/user/request-body.adoc[]
 include::{snippets}/user/response-fields.adoc[]
 ====
 
+== DB 사용자 조회
+
+=== */db/users/* ===
+
+.요청 본문
+[%collapsible]
+====
+include::{snippets}/dbUser/request-body.adoc[]
+====
+
+====
+include::{snippets}/dbUser/request-fields.adoc[]
+====
+
+.응답 본문
+[%collapsible]
+====
+include::{snippets}/dbUser/response-body.adoc[]
+====
+
+====
+include::{snippets}/dbUser/response-fields.adoc[]
+====
 
 
