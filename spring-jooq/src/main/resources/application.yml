@@ -1,0 +1,16 @@
+spring:
+  application:
+    name: spring-jooq
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath*:sql/schema.sql
+  datasource:
+    url: jdbc:mysql://localhost:3306/library?createDatabaseIfNotExist=true
+    username: root
+    password:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+logging:
+  level:
+    org.springframework.jdbc.datasource.init: DEBUG
