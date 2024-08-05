@@ -11,6 +11,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 class RequestBuilder {
     var endPoint: String = ""
     var method: HttpMethod = HttpMethod.GET
+    var params: MutableMap<String, String> = mutableMapOf()
     var body: Any? = null
 
     fun build(): MockHttpServletRequestBuilder {
@@ -21,7 +22,7 @@ class RequestBuilder {
             HttpMethod.DELETE -> delete(endPoint)
             else -> throw RuntimeException("Unsupported method: $method")
         }
-
+        
         body?.let {
             builder.contentType(MediaType.APPLICATION_JSON)
                 .content(ObjectMapper().writeValueAsString(it))
