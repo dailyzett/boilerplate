@@ -1,5 +1,6 @@
 package org.example.springjooq.config
 
+import org.jooq.SQLDialect
 import org.jooq.impl.DataSourceConnectionProvider
 import org.jooq.impl.DefaultConfiguration
 import org.jooq.impl.DefaultDSLContext
@@ -29,6 +30,7 @@ class JooqConfig {
     fun configuration(): DefaultConfiguration {
         val jooqConfig = DefaultConfiguration()
         jooqConfig.set(connectionProvider())
+        jooqConfig.set(SQLDialect.MYSQL)
         return jooqConfig
     }
 }

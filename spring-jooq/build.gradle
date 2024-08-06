@@ -3,6 +3,7 @@ plugins {
     id 'io.spring.dependency-management' version '1.1.6'
     id 'org.jetbrains.kotlin.jvm' version '1.9.24'
     id 'org.jetbrains.kotlin.plugin.spring' version '1.9.24'
+    id 'nu.studer.jooq' version '9.0'
 }
 
 group = 'org.example'
@@ -28,6 +29,10 @@ dependencies {
     testImplementation 'org.jetbrains.kotlin:kotlin-test-junit5'
     runtimeOnly 'com.mysql:mysql-connector-j'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    jooqGenerator 'com.mysql:mysql-connector-j'
+    jooqGenerator 'org.jooq:jooq'
+    jooqGenerator 'org.jooq:jooq-meta'
 }
 
 kotlin {
@@ -38,4 +43,47 @@ kotlin {
 
 tasks.named('test') {
     useJUnitPlatform()
+}
+
+jooq {
+    configurations {
+        main {
+            generationTool {
+                jdbc {
+                    driver = 'com.mysql.cj.jdbc.Driver'
+                    url = 'jdbc:mysql://localhost:3306/library'
+                    user = 'root'
+                    password = ''
+                }
+
+                generator {
+                    name = 'org.jooq.codegen.DefaultGenerator'
+                    database {
+                        name = 'org.jooq.meta.mysql.MySQLDatabase'
+                        inputSchema = 'library'
+                    }
+
+                    generate {
+                        daos = true
+                        records = true
+                        fluentSetters = true
+                        javaTimeTypes = true
+                        deprecated = false
+                    }
+                    target {
+                        directory = 'src/generated'
+                    }
+                    strategy.name = 'org.jooq.codegen.DefaultGeneratorStrategy'
+                }
+            }
+        }
+    }
+}
+
+sourceSets {
+    main {
+        kotlin {
+            srcDirs 'src/main/kotlin', 'src/generated'
+        }
+    }
 }
